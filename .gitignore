@@ -17,4 +17,5 @@
 #杂项
 !.gitignore
 Intermediate/
+Saved/
 !*.uproject
