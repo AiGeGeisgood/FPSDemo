@@ -1,0 +1,20 @@
+# Ignore all files by default, but scan all directories
+*
+!*/
+
+# C/C++ source files
+!*.c
+!*.cpp
+!*.h
+
+# C# source files
+!*.cs
+*.Target.cs
+
+#蓝图资源
+!*.umap
+!*.uasset
+
+#杂项
+!.gitignore
+Intermediate/
