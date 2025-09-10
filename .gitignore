@@ -9,7 +9,6 @@
 
 # C# source files
 !*.cs
-*.Target.cs
 
 #蓝图资源
 !*.umap
@@ -18,3 +17,4 @@
 #杂项
 !.gitignore
 Intermediate/
+!*.uproject
