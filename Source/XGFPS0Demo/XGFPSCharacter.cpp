@@ -162,24 +162,24 @@ void AXGFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 
-	// 设置"移动"绑定。
-
-	PlayerInputComponent->BindAxis("MoveForward", this, &AXGFPSCharacter::MoveForward);
-
-	PlayerInputComponent->BindAxis("MoveRight", this, &AXGFPSCharacter::MoveRight);
-
-	// 设置"观看"绑定。
-
-	PlayerInputComponent->BindAxis("Turn", this, &AXGFPSCharacter::AddControllerYawInput);
-
-	PlayerInputComponent->BindAxis("LookUp", this, &AXGFPSCharacter::AddControllerPitchInput);
-
-	// 设置"操作"绑定。
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
-
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AXGFPSCharacter::Fire);
+	// // 设置"移动"绑定。
+	//
+	// PlayerInputComponent->BindAxis("MoveForward", this, &AXGFPSCharacter::MoveForward);
+	//
+	// PlayerInputComponent->BindAxis("MoveRight", this, &AXGFPSCharacter::MoveRight);
+	//
+	// // 设置"观看"绑定。
+	//
+	// PlayerInputComponent->BindAxis("Turn", this, &AXGFPSCharacter::AddControllerYawInput);
+	//
+	// PlayerInputComponent->BindAxis("LookUp", this, &AXGFPSCharacter::AddControllerPitchInput);
+	//
+	// // 设置"操作"绑定。
+	// PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	// PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	//
+	//
+	// PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AXGFPSCharacter::Fire);
 
 
 }
