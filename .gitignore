@@ -15,7 +15,7 @@
 !*.uasset
 
 #杂项
-!.gitignore
+!/.gitignore
 Intermediate/
 Saved/
 !*.uproject
