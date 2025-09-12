@@ -70,6 +70,14 @@ void AXGFPSCharacter::BeginPlay()
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("We are using FPSCharacter."));
 }
 
+void AXGFPSCharacter::Move(const FInputActionValue& Value)
+{
+}
+
+void AXGFPSCharacter::Look(const FInputActionValue& Value)
+{
+}
+
 void AXGFPSCharacter::MoveForward(float Value)
 {
 	// 找出"前进"方向，并记录玩家想向该方向移动。
