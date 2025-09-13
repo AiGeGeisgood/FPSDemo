@@ -65,7 +65,7 @@ public:
 
 private:
 	// 枪口相对于摄像机位置的偏移。
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Agg|Gameplay", meta = (AllowPrivateAccess = "true"))
 	FVector MuzzleOffset;
 
 	// 要生成的发射物类。
@@ -73,21 +73,21 @@ private:
 	TSubclassOf<class AXGFPSProjectile> ProjectileClass;
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = "Agg|Mesh", meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* Mesh1P;
 
 	/** First person camera */
-	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = Camera,
+	UPROPERTY(VisibleAnywhere, BlueprintReadonly, Category = "Agg|Camera",
 		meta =( AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCameraComponent;
 
-	UPROPERTY(editAnywhere, BlueprintReadWrite, Category = Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(editAnywhere, BlueprintReadWrite, Category = "Agg|Input", meta=(AllowPrivateAccess = "true"))
 	UInputAction* JumpAction;
 
-	UPROPERTY(editAnywhere, BlueprintReadWrite, Category = Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(editAnywhere, BlueprintReadWrite, Category = "Agg|Input", meta=(AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 
-	UPROPERTY(editAnywhere, BlueprintReadWrite, Category = Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(editAnywhere, BlueprintReadWrite, Category = "Agg|Input", meta=(AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
 public:
