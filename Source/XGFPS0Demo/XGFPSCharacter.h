@@ -9,6 +9,7 @@
 class UInputAction;
 class USkeletalMeshComponent;
 class UCameraComponent;
+struct FInputActionValue;
 
 UCLASS(Config=Game)
 class XGFPS0DEMO_API AXGFPSCharacter : public ACharacter
@@ -37,15 +38,6 @@ protected:
 	void Move(const FInputActionValue& Value);
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-
-	// 处理用于前后移动的输入。
-
-	UFUNCTION()
-	void MoveForward(float Value);
-
-	// 处理用于左右移动的输入。
-	UFUNCTION()
-	void MoveRight(float Value);
 
 
 	// 按下键时，设置跳跃标记。

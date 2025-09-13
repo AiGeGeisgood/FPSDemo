@@ -3,55 +3,36 @@
 
 #include "XGFPSCharacter.h"
 
+#include "EnhancedInputComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 
 #include "XGFPSProjectile.h"
 
+DECLARE_LOG_CATEGORY_CLASS(LogAXGFPSCharacter, Log, All)
 
 // Sets default values
 AXGFPSCharacter::AXGFPSCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
 
-	// 创建第一人称摄像机组件。
-	FPSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	check(FPSCameraComponent != nullptr);
+	// Set size for collision capsule
+	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.f);
 
-	// 将摄像机组件附加到我们的胶囊体组件。
-	FPSCameraComponent->SetupAttachment(CastChecked<USceneComponent, UCapsuleComponent>(GetCapsuleComponent()));
+	//·Create a CameraComponent
+	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCameraComponent->SetRelativeLocation(FVector(-10.f, 0.f, 60.f)); // Position the camera
+	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 
-	// 将摄像机置于略高于眼睛上方的位置。
-
-	FPSCameraComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f + BaseEyeHeight));
-
-	// 允许Pawn控制摄像机旋转。
-	FPSCameraComponent->bUsePawnControlRotation = true;
-
-
-	// 为所属玩家创建第一人称网格体组件。
-
-	FPSMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh"));
-
-	check(FPSMesh != nullptr);
-
-	// 只有所属玩家可以看见此网格体。
-	FPSMesh->SetOnlyOwnerSee(true);
-
-	// 将FPS网格体附加到FPS摄像机。
-	FPSMesh->SetupAttachment(FPSCameraComponent);
-
-	// 禁用某些环境阴影以便实现只有一个网格体的感觉。
-	FPSMesh->bCastDynamicShadow = false;
-
-	FPSMesh->CastShadow = false;
-
-
-
-	// 所属玩家看不到常规（第三人称）全身网格体。
-	GetMesh()->SetOwnerNoSee(true);
-
+	// Create a mesh component that will be used when being viewed from a ist person' view (when controlling this pawn)
+	Mesh1P = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
+	Mesh1P->SetOnlyOwnerSee(true);
+	Mesh1P->SetupAttachment(FirstPersonCameraComponent);
+	Mesh1P->bCastDynamicShadow = false;
+	Mesh1P->CastShadow = false;
+	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 }
 
 // Called when the game starts or when spawned
@@ -60,7 +41,6 @@ void AXGFPSCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	check(GEngine != nullptr);
-
 
 
 	// 显示调试消息五秒。 
@@ -72,38 +52,37 @@ void AXGFPSCharacter::BeginPlay()
 
 void AXGFPSCharacter::Move(const FInputActionValue& Value)
 {
+	//-input is a Vector2D
+	FVector2D MovementVector = Value.Get<FVector2D>();
+	if (Controller != nullptr)
+	{
+		//add movement
+		AddMovementInput(GetActorForwardVector(), MovementVector.X);
+		AddMovementInput(GetActorRightVector(), MovementVector.Y);
+	}
 }
 
 void AXGFPSCharacter::Look(const FInputActionValue& Value)
 {
+	// input is a Vector2D
+	FVector2D LookAxisVector = Value.Get<FVector2D>();
+	if (Controller != nullptr)
+	{
+		// add yaw and pitch input to controller
+		AddControllerYawInput(LookAxisVector.X);
+		AddControllerPitchInput(LookAxisVector.Y);
+	}
 }
 
-void AXGFPSCharacter::MoveForward(float Value)
-{
-	// 找出"前进"方向，并记录玩家想向该方向移动。
-	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::X);
-	AddMovementInput(Direction, Value);
-
-}
-
-void AXGFPSCharacter::MoveRight(float Value)
-{
-
-	// 找出"右侧"方向，并记录玩家想向该方向移动。
-	FVector Direction = FRotationMatrix(Controller->GetControlRotation()).GetScaledAxis(EAxis::Y);
-	AddMovementInput(Direction, Value);
-}
 
 void AXGFPSCharacter::StartJump()
 {
 	bPressedJump = true;
-	
 }
 
 void AXGFPSCharacter::StopJump()
 {
 	bPressedJump = false;
-
 }
 
 
@@ -112,7 +91,6 @@ void AXGFPSCharacter::Fire()
 	// 试图发射发射物。
 	if (ProjectileClass)
 	{
-		
 		// 获取摄像机变换。
 		FVector CameraLocation;
 		FRotator CameraRotation;
@@ -123,7 +101,7 @@ void AXGFPSCharacter::Fire()
 
 		// 将MuzzleOffset从摄像机空间变换到世界空间。
 		FVector MuzzleLocation = CameraLocation + FTransform(CameraRotation).TransformVector(MuzzleOffset);
-		
+
 		// 使目标方向略向上倾斜。
 		FRotator MuzzleRotation = CameraRotation;
 		MuzzleRotation.Pitch += 10.0f;
@@ -137,7 +115,8 @@ void AXGFPSCharacter::Fire()
 			SpawnParams.Instigator = GetInstigator();
 
 			// 在枪口位置生成发射物。
-			AXGFPSProjectile* Projectile = World->SpawnActor<AXGFPSProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
+			AXGFPSProjectile* Projectile = World->SpawnActor<AXGFPSProjectile>(
+				ProjectileClass, MuzzleLocation, MuzzleRotation, SpawnParams);
 
 			if (Projectile)
 			{
@@ -145,50 +124,35 @@ void AXGFPSCharacter::Fire()
 				FVector LaunchDirection = MuzzleRotation.Vector();
 				Projectile->FireInDirection(LaunchDirection);
 			}
-
-
-
 		}
-
-
 	}
-
-
-
 }
 
 // Called every frame
 void AXGFPSCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
- 
+
 // Called to bind functionality to input
 void AXGFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	// Set up action bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		// Jumping
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
-	// // 设置"移动"绑定。
-	//
-	// PlayerInputComponent->BindAxis("MoveForward", this, &AXGFPSCharacter::MoveForward);
-	//
-	// PlayerInputComponent->BindAxis("MoveRight", this, &AXGFPSCharacter::MoveRight);
-	//
-	// // 设置"观看"绑定。
-	//
-	// PlayerInputComponent->BindAxis("Turn", this, &AXGFPSCharacter::AddControllerYawInput);
-	//
-	// PlayerInputComponent->BindAxis("LookUp", this, &AXGFPSCharacter::AddControllerPitchInput);
-	//
-	// // 设置"操作"绑定。
-	// PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	// PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-	//
-	//
-	// PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AXGFPSCharacter::Fire);
-
-
+		// Moving
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AXGFPSCharacter::Move);
+		// Looking
+		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AXGFPSCharacter::Look);
+	}
+	else
+	{
+		UE_LOG(LogAXGFPSCharacter, Error, TEXT("'%s',Enhanced Input Error"), *GetNameSafe(this));
+	}
 }
-
